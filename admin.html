@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - DNK Dev</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: #f5f6fa;
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background-color: #1e1e2f;
+      color: #fff;
+    }
+    .navbar .logo { font-weight: 800; font-size: 1.5rem; }
+    .nav-links { list-style: none; display: flex; gap: 1rem; }
+    .nav-links a { color: #fff; text-decoration: none; }
+    .hero {
+      height: 40vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #4e54c8;  /* gradient fallback */
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+      color: #fff;
+      text-align: center;
+    }
+    .hero h1 { margin: 0; font-size: 2.5rem; }
+    .hero p { font-size: 1.2rem; }
+
+    /* Login Form */
+    #loginForm {
+      max-width: 400px;
+      margin: 3rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    #loginForm input {
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    #loginForm button {
+      padding: 0.8rem;
+      background-color: #4e54c8;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #loginForm button:hover {
+      background-color: #3b40a4;
+    }
+
+    /* Admin Panel */
+    #adminPanel {
+      max-width: 1000px;
+      margin: 2rem auto;
+      display: none;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .admin-section h2 {
+      margin-bottom: 1rem;
+    }
+    .admin-card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .admin-card p { margin: 0.2rem 0; }
+    .btn-delete {
+      background-color: #ff6b6b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-delete:hover {
+      background-color: #e53e3e;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="logo">DNK Dev Admin</div>
+    <ul class="nav-links">
+      <li><a href="index.html#hero">Home</a></li>
+      <li><a href="admin.html" class="active">Admin</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <header class="hero">
+    <h1>Admin Dashboard</h1>
+    <p>Manage contact messages and quote requests</p>
+  </header>
+
+  <!-- ===== Login Form ===== -->
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <!-- ===== Admin Panel ===== -->
+  <div id="adminPanel">
+    <section class="admin-section">
+      <h2>Contact Messages</h2>
+      <div id="contactMessages"></div>
+    </section>
+
+    <section class="admin-section">
+      <h2>Quote Requests</h2>
+      <div id="quoteRequests"></div>
+    </section>
+  </div>
+
+  <script>
+    let token = localStorage.getItem("token");
+
+    // ===== LOGIN =====
+    const loginForm = document.getElementById("loginForm");
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      const res = await fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ username, password })
+      });
+
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        token = data.access_token;
+        loginForm.style.display = "none";
+        document.getElementById("adminPanel").style.display = "flex";
+        fetchContacts();
+        fetchQuotes();
+      } else {
+        alert("Login failed");
+      }
+    });
+
+    // ===== FETCH CONTACTS =====
+    async function fetchContacts() {
+      const res = await fetch("http://127.0.0.1:8000/contacts", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const container = document.getElementById("contactMessages");
+      container.innerHTML = "";
+      data.forEach(msg => {
+        container.innerHTML += `
+          <div class="admin-card">
+            <div>
+              <p><strong>Name:</strong> ${msg.name}</p>
+              <p><strong>Email:</strong> ${msg.email}</p>
+              <p><strong>Message:</strong> ${msg.message}</p>
+            </div>
+            <button onclick="deleteContact(${msg.id})" class="btn-delete">Delete</button>
+          </div>`;
+      });
+    }
+
+    // ===== FETCH QUOTES =====
+    async function fetchQuotes() {
+      const res = await fetch("http://127.0.0.1:8000/quotes", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const container = document.getElementById("quoteRequests");
+      container.innerHTML = "";
+      data.forEach(q => {
+        container.innerHTML += `
+          <div class="admin-card">
+            <div>
+              <p><strong>Name:</strong> ${q.name}</p>
+              <p><strong>Email:</strong> ${q.email}</p>
+              <p><strong>Service:</strong> ${q.service}</p>
+              <p><strong>Details:</strong> ${q.details}</p>
+            </div>
+            <button onclick="deleteQuote(${q.id})" class="btn-delete">Delete</button>
+          </div>`;
+      });
+    }
+
+    // ===== DELETE HANDLERS =====
+    async function deleteContact(id) {
+      await fetch(`http://127.0.0.1:8000/contact/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchContacts();
+    }
+
+    async function deleteQuote(id) {
+      await fetch(`http://127.0.0.1:8000/quote/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchQuotes();
+    }
+
+    // Auto-show admin panel if token exists
+    if (token) {
+      loginForm.style.display = "none";
+      document.getElementById("adminPanel").style.display = "flex";
+      fetchContacts();
+      fetchQuotes();
+    }
+  </script>
+</body>
+</html>

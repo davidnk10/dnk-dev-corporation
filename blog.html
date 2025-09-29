@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog - DNK Dev Corporation</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="logo">DNK Dev</div>
+    <ul class="nav-links">
+      <li><a href="index.html#hero">Home</a></li>
+      <li><a href="index.html#services">Services</a></li>
+      <li><a href="index.html#portfolio">Portfolio</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="blog.html" class="active">Blog</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ===== Hero Section ===== -->
+  <header class="hero" style="height:50vh;">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Insights & Blog</h1>
+      <p>Read about our latest projects, tech news, and tips.</p>
+    </div>
+  </header>
+
+  <!-- ===== Blog Section ===== -->
+  <section class="blog modern-blog">
+    <div id="blog-grid" class="blog-grid">
+      <!-- Blog posts will be loaded here dynamically -->
+    </div>
+    <div class="load-more">
+      <button id="loadMore" class="btn">Load More</button>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-box about-box">
+        <h3>About DNK Dev</h3>
+        <p>We deliver innovative digital solutions that help businesses grow and stay secure.</p>
+      </div>
+      <div class="footer-box links-box">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="index.html#hero">Home</a></li>
+          <li><a href="index.html#services">Services</a></li>
+          <li><a href="index.html#portfolio">Portfolio</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-box socials-box">
+        <h3>Follow Us</h3>
+        <div class="socials">
+          <a href="#">🌐</a>
+          <a href="#">🐦</a>
+          <a href="#">📘</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 DNK Dev Corporation. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+  // ===== Sample Blog Data =====
+  const blogPosts = [
+    {title:"5 Web Development Trends in 2025", desc:"Stay ahead with the latest trends in web development.", img:"images/blog1.jpg", link:"/blog/blog-post1.html"},
+    {title:"How to Secure Your Business Online", desc:"Top cybersecurity practices for small and medium businesses.", img:"images/blog2.jpeg", link:"/blog/blog-post2.html"},
+    {title:"Mobile App UX Tips", desc:"Improve user engagement with these UI/UX strategies.", img:"images/blog3.png", link:"/blog/blog-post3.html"},
+    {title:"Top E-commerce Strategies", desc:"Boost your online sales with these e-commerce tips.", img:"images/blog4.jpeg", link:"/blog/blog-post4.html"},
+    {title:"AI in Modern Business", desc:"How AI is transforming industries worldwide.", img:"images/blog5.jpg", link:"blog/blog-post5.html"},
+    {title:"DevOps Best Practices", desc:"Streamline your development workflow effectively.", img:"images/blog6.png", link:"blog/blog-post6.html"},
+    {title:"Cloud Solutions Explained", desc:"Benefits of moving your business to the cloud.", img:"images/blog7.png", link:"blog/blog-post7.html"},
+    {title:"Future of Mobile Apps", desc:"Predictions for mobile app trends in 2025.", img:"images/blog8.jpeg", link:"blog/blog-post8.html"}
+  ];
+
+  const blogGrid = document.getElementById('blog-grid');
+  const loadMoreBtn = document.getElementById('loadMore');
+
+  let postsPerPage = 3;
+  let currentIndex = 0;
+
+  function renderPosts() {
+    const slice = blogPosts.slice(currentIndex, currentIndex + postsPerPage);
+    slice.forEach(post => {
+      const postHTML = `
+        <div class="blog-card animate">
+          <img src="${post.img}" alt="${post.title}">
+          <div class="blog-content">
+            <h3>${post.title}</h3>
+            <p>${post.desc}</p>
+            <a href="${post.link}" class="btn">Read More</a>
+          </div>
+        </div>
+      `;
+      blogGrid.insertAdjacentHTML('beforeend', postHTML);
+    });
+    currentIndex += postsPerPage;
+    if(currentIndex >= blogPosts.length){
+      loadMoreBtn.style.display = 'none';
+    }
+  }
+
+  loadMoreBtn.addEventListener('click', renderPosts);
+
+  // Initial load
+  renderPosts();
+</script>
+
+  <script src="app.js"></script>
+</body>
+</html>
